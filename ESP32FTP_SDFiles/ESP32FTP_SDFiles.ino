@@ -52,9 +52,13 @@ void ReadData() {
   distance= duration*0.034/2;
 
   // Prints the distance on the Serial Monitor
-  Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" Inch");  
+  if (distance < 12){
+    printLocalTime();
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" Inch");  
+
+  }
 
 }
 void setup() {
@@ -75,7 +79,6 @@ void setup() {
 }
 void loop() {
   ReadData();
-  printLocalTime();
   delay(100);
 }
 
