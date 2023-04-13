@@ -31,8 +31,8 @@ long duration;
 int distance;
 
 // Replace with your network credentials
-const char* ssid     = "Green PG";
-const char* password = "jayhind303";
+const char* ssid     = "Redmi Note 8 Pro";
+const char* password = "11111111";
 
 
 
@@ -53,8 +53,8 @@ void ReadData() {
 
   // Prints the distance on the Serial Monitor
   Serial.print("Distance: ");
-  Serial.println(distance);
-  Serial.print("cm");  
+  Serial.print(distance);
+  Serial.println(" Inch");  
 
 }
 void setup() {
@@ -74,8 +74,9 @@ void setup() {
   */
 }
 void loop() {
-  //ReadData();
-  delay(20);
+  ReadData();
+  printLocalTime();
+  delay(100);
 }
 
 
