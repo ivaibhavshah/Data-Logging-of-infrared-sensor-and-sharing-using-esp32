@@ -1,6 +1,8 @@
 #include "FS.h"
+#include "Arduino.h"
 #include "SD.h"
-
+#include <WiFiClient.h> 
+#include <ESP32_FTPClient.h>
 #include "time.h"
 #include <SPI.h>
 #include <WiFi.h>
@@ -21,11 +23,16 @@ const long  gmtOffset_sec = 19800;
 const int   daylightOffset_sec = 0;
 const char* ntpServer = "asia.pool.ntp.org";
 
-const char* ssid     = "Redmi Note 8 Pro";
-const char* password = "11111111";
+char ftp_server[] = "192.168.10.94";
+char ftp_user[]   = "android";
+char ftp_pass[]   = "android";
+const char* ssid     = "Techsture 2020";
+const char* password = "Tech7219@@";
 
 RTC_DATA_ATTR int sensor_data = 0;
 String Data;
+// FTP Client initialization
+ESP32_FTPClient ftp(ftp_server,ftp_user,ftp_pass, 5000, 1); //0=debug is off
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
@@ -91,6 +98,10 @@ void loop() {
     data_logging();
     sensor_data++;
   }
+
+  if(sensor_data>10){
+    readAndSendBigBinFile(SD, filename, ftp);
+  }
   delay(1000);
   
 }
@@ -126,10 +137,11 @@ void printLocalTime(){
   // There was an error in pre defined function for getting year soo we variable for getting year only is used
   char timeYear[5];
   strftime(timeYear,5, "%Y", &timeinfo);
-  Time = String(timeinfo.tm_hour)+":"+String(timeinfo.tm_min)+":"+String(timeinfo.tm_sec) ;
+  Time = String(timeinfo.tm_hour)+":"+String(timeinfo.tm_min);
   Day =  String(timeYear)+"-"+String((timeinfo.tm_mon)+1)+"-"+ String(timeinfo.tm_mday);
   String temp = "/"+Day+".txt";
   temp.toCharArray(filename, 50);
+  Time += ":"+String(timeinfo.tm_sec) ;
 
 }
 
@@ -174,3 +186,35 @@ void appendFile(fs::FS &fs,char filename[50], const char * message) {
   }
   file.close();
 }
+
+
+// ReadFile Example from ESP32 SD_MMC Library within Core\Libraries
+// Changed to also write the output to an FTP Stream
+void readAndSendBigBinFile(fs::FS& fs, const char* path, ESP32_FTPClient ftpClient) {
+    ftpClient.InitFile("Type I");
+    ftpClient.NewFile(path);
+    
+    String fullPath = "";
+    fullPath.concat(path);
+    Serial.printf("Reading file: %s\n", fullPath);
+
+    File file = fs.open(fullPath);
+    if (!file) {
+        Serial.println("Failed to open file for reading");
+        return;
+    }
+
+    Serial.print("Read from file: ");
+    
+    while (file.available()) {
+        // Create and fill a buffer
+        unsigned char buf[1024];
+        int readVal = file.read(buf, sizeof(buf));
+        ftpClient.WriteData(buf,sizeof(buf));
+    }
+    ftpClient.CloseFile();
+    file.close();
+}
+
+
+
