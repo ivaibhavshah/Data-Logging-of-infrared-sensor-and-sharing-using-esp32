@@ -1,55 +1,50 @@
 #include "FS.h"
-#include "Arduino.h"
 #include "SD.h"
-#include <WiFiClient.h> 
-#include <ESP32_FTPClient.h>
 #include "time.h"
 #include <SPI.h>
 #include <WiFi.h>
+#include <WiFiClient.h>
+#include "ESP32FtpServer.h"
 #include <NTPClient.h>
+#include "Arduino.h"
 #include <WiFiUdp.h>
-
 // defines variables
 const int trigPin = 16;
 const int echoPin = 17;
 long duration;
 int distance;
 char filename[50];
-uint64_t uS_TO_S_FACTOR = 1000000; 
+char filename_wt[50];
+uint64_t uS_TO_S_FACTOR = 1000000;
 uint64_t TIME_TO_SLEEP = 2;
+FtpServer ftpSrv; 
 
 // variables to get time from ntp server of GMT +5.30
-const long  gmtOffset_sec = 19800;
-const int   daylightOffset_sec = 0;
+const long gmtOffset_sec = 19800;
+const int daylightOffset_sec = 0;
 const char* ntpServer = "asia.pool.ntp.org";
 
-char ftp_server[] = "192.168.10.94";
-char ftp_user[]   = "android";
-char ftp_pass[]   = "android";
-const char* ssid     = "Techsture 2020";
-const char* password = "Tech7219@@";
+const char* ssid = "Redmi Note 8 Pro";
+const char* password = "11111111";
 
 RTC_DATA_ATTR int sensor_data = 0;
 String Data;
-// FTP Client initialization
-ESP32_FTPClient ftp(ftp_server,ftp_user,ftp_pass, 5000, 1); //0=debug is off
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP);
-
 String Date;
 String Day;
 String Time;
 const int led = 2;
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
 // Function to read data from Ultra sonic sensor
 
 void setup() {
   Serial.begin(115200);
   pinMode(led, OUTPUT);
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-  
+  pinMode(trigPin, OUTPUT);  // Sets the trigPin as an Output
+  pinMode(echoPin, INPUT);   // Sets the echoPin as an Input
+
   Serial.print("Connecting to ");
   Serial.print(ssid);
   WiFi.begin(ssid, password);
@@ -59,55 +54,59 @@ void setup() {
   }
   Serial.println("");
   Serial.println("WiFi connected.");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
   printLocalTime();
-  timeClient.begin();
-  timeClient.setTimeOffset(18000);
-
-  if(!SD.begin()) {
-    Serial.println("Card Mount Failed");
-    return;
+  
+  if (SD.begin()) {
+      Serial.println("SD Mounted!");
+      ftpSrv.begin("knightmoon","admin");    //username, password for ftp.  set ports in ESP32FtpServer.h  (default 21, 50009 for PASV)
   }
+  else{
+    Serial.println("Card Mount Failed");
+  }    
+  File file = SD.open(filename);
+    if (!file) {
+      Serial.println("File does not exist");
+      Serial.println("Creating file...");
+      writeFile(SD, filename, "Reading Number, Date, Hour, Distance \r\n");
+    }
+    file.close();
   uint8_t cardType = SD.cardType();
-  if(cardType == CARD_NONE) {
+  if (cardType == CARD_NONE) {
     Serial.println("No SD card attached");
     return;
   }
-  
 }
 
+
 void loop() {
+  ftpSrv.handleFTP();
   Serial.println("Initializing SD card...");
-  if (!SD.begin()) {
+  if (!SD.begin())
+  {
     Serial.println("SD card initialization failed!");
-    return;    
-  }
-  else {
+    return;
+  } 
+  else 
+  {
     Serial.println("SD Card Initialized!!");
   }
   ReadData();
-  
-  if (distance<20){
-    File file = SD.open(filename);
-    if(!file) {
-      Serial.println("File does not exist");
-      Serial.println("Creating file...");
-      writeFile(SD, filename , "Reading Number, Date, Hour, Distance \r\n");
-    }
-    file.close();
-    printLocalTime();
-    data_logging();
-    sensor_data++;
+  printLocalTime();
+  data_logging();
+  sensor_data++;
+  if (sensor_data > 20) 
+  {
+    renameFile(SD_MMC, "2023-04-19.txt","2023.txt");
+    sensor_data = 0;
   }
-
-  if(sensor_data>10){
-    readAndSendBigBinFile(SD, filename, ftp);
-  }
-  delay(1000);
-  
+  delay(500);
 }
 
-void ReadData() {
-    // Clears the trigPin
+void ReadData() 
+{
+  // Clears the trigPin
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   // Sets the trigPin on HIGH state for 10 micro seconds
@@ -118,52 +117,61 @@ void ReadData() {
   duration = pulseIn(echoPin, HIGH);
 
   // Calculating the distance
-  distance= duration*0.034/2;
+  distance = duration * 0.034 / 2;
 
   // Prints the distance on the Serial Monitor
   Serial.print("Distance: ");
   Serial.print(distance);
-  Serial.println(" Inch");  
+  Serial.println(" Inch");
 }
 
 
-void printLocalTime(){
+void printLocalTime() 
+{
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   struct tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
+  if (!getLocalTime(&timeinfo)) {
     Serial.println("Failed to obtain time");
     return;
   }
   // There was an error in pre defined function for getting year soo we variable for getting year only is used
   char timeYear[5];
-  strftime(timeYear,5, "%Y", &timeinfo);
-  Time = String(timeinfo.tm_hour)+":"+String(timeinfo.tm_min);
-  Day =  String(timeYear)+"-"+String((timeinfo.tm_mon)+1)+"-"+ String(timeinfo.tm_mday);
-  String temp = "/"+Day+".txt";
+  strftime(timeYear, 5, "%Y", &timeinfo);
+  Time = String(timeinfo.tm_hour) + ":" + String(timeinfo.tm_min);
+  Day = String(timeYear) + "-" + String((timeinfo.tm_mon) + 1) + "-" + String(timeinfo.tm_mday);
+  String temp = "/" + Day + ".txt";
   temp.toCharArray(filename, 50);
-  Time += ":"+String(timeinfo.tm_sec) ;
-
+  Time += ":" + String(timeinfo.tm_sec);
+  temp="/"+Day+" "+Time+".txt";
+  temp.toCharArray(filename_wt, 50);
 }
 
-void data_logging() {
-  digitalWrite(led, 1);
-  Data = String(sensor_data) + "," + String(Day) + "," + String(Time) + "," + 
-                String(distance) + "\r\n";
-  Serial.print("Save data: ");
-  Serial.println(Data);
-  appendFile(SD,filename, Data.c_str());
+void data_logging() 
+{
+  
+  if (distance < 20) {
+    digitalWrite(led, 1);
+    Data = String(sensor_data) + "," + String(Day) + "," + String(Time) + "," + String(distance) + "\r\n";
+    Serial.print("Save data: ");
+    Serial.println(Data);
+    appendFile(SD, filename, Data.c_str());
+  }
   digitalWrite(led, 0);
 }
 
-void writeFile(fs::FS &fs,char filename[50], const char* message) {
+
+// File operations of sd card
+
+void writeFile(fs::FS& fs, char filename[50], const char* message) 
+{
   Serial.printf("Writing file: %s\n", filename);
 
   File file = fs.open(filename, FILE_WRITE);
-  if(!file) {
+  if (!file) {
     Serial.println("Failed to open file for writing");
     return;
   }
-  if(file.print(message)) {
+  if (file.print(message)) {
     Serial.println("File written");
   } else {
     Serial.println("Write failed");
@@ -171,15 +179,16 @@ void writeFile(fs::FS &fs,char filename[50], const char* message) {
   file.close();
 }
 
-void appendFile(fs::FS &fs,char filename[50], const char * message) {
+void appendFile(fs::FS& fs, char filename[50], const char* message) 
+{
   Serial.printf("Appending to file: %s\n", filename);
 
   File file = fs.open(filename, FILE_APPEND);
-  if(!file) {
+  if (!file) {
     Serial.println("Failed to open file for appending");
     return;
   }
-  if(file.print(message)) {
+  if (file.print(message)) {
     Serial.println("Message appended");
   } else {
     Serial.println("Append failed");
@@ -187,34 +196,12 @@ void appendFile(fs::FS &fs,char filename[50], const char * message) {
   file.close();
 }
 
-
-// ReadFile Example from ESP32 SD_MMC Library within Core\Libraries
-// Changed to also write the output to an FTP Stream
-void readAndSendBigBinFile(fs::FS& fs, const char* path, ESP32_FTPClient ftpClient) {
-    ftpClient.InitFile("Type I");
-    ftpClient.NewFile(path);
-    
-    String fullPath = "";
-    fullPath.concat(path);
-    Serial.printf("Reading file: %s\n", fullPath);
-
-    File file = fs.open(fullPath);
-    if (!file) {
-        Serial.println("Failed to open file for reading");
-        return;
-    }
-
-    Serial.print("Read from file: ");
-    
-    while (file.available()) {
-        // Create and fill a buffer
-        unsigned char buf[1024];
-        int readVal = file.read(buf, sizeof(buf));
-        ftpClient.WriteData(buf,sizeof(buf));
-    }
-    ftpClient.CloseFile();
-    file.close();
+void renameFile(fs::FS &fs, const char * path1, const char * path2)
+{
+  Serial.printf("Renaming file %s to %s\n", path1, path2);
+  if (fs.rename(path1, path2)) {
+    Serial.println("File renamed");
+  } else {
+    Serial.println("Rename failed");
+  }
 }
-
-
-
