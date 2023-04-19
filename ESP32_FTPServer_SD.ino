@@ -6,7 +6,14 @@
 #include <WiFiClient.h>
 #include "ESP32FtpServer.h"
 #include <NTPClient.h>
+https://techtutorialsx.com/2019/02/24/esp32-arduino-renaming-a-file-in-the-spiffs-file-system/#:~:text=listAllFiles()%3B,renamed%2C%20also%20as%20a%20string.
 
+
+
+
+
+
+https://techtutorialsx.com/2019/02/23/esp32-arduino-list-all-files-in-the-spiffs-file-system/
 
 // defines variables
 const int trigPin = 16;
