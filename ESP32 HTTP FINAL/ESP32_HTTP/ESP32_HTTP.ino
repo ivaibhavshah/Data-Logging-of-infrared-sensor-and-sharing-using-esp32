@@ -12,6 +12,7 @@
 // #define SOUND_SPEED 0.034
 // #define CM_TO_INCH 0.393701
 #define CALCULATION_TO_CONVERT 0.006692917
+#define led 2
 
 const char * message;
 long duration;
@@ -27,6 +28,7 @@ ESP32WebServer server(80);
 WiFiMulti wifiMulti;
 #define servername "esp32server" //Define the name to your server... 
 #define SD_pin 16 //G16 
+
 bool   SD_present = false; //Controls if the SD card is present or not
 
 
@@ -39,13 +41,13 @@ String Data;
 String DateTime;
 String Dirname;
 String Time;
-const int led = 2;
 
 /*********  SETUP  **********/
 
 void setup()
 {  
   Serial.begin(115200);
+  pinMode(led, OUTPUT);
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
   wifiMulti.addAP("Green PG","jayhind303");  // add Wi-Fi networks you want to connect to, it connects strongest to weakest
@@ -97,9 +99,12 @@ void loop()
   ReadData();
   if (distance<20)
   {
+    digitalWrite(led, 1);
     logSDCard();
+    digitalWrite(led, 0);
   }
   delay(1000);
+
 
 }
 
@@ -149,6 +154,7 @@ void logSDCard() {
 
 
 // Write to the SD card (DON'T MODIFY THIS FUNCTION)
+
 void writeFile(fs::FS &fs, const char * path, const char * message) {
   Serial.printf("Writing file: %s\n", path);
 
