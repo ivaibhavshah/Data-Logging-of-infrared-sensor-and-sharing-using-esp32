@@ -248,7 +248,7 @@ void SD_dir()
       root.rewindDirectory();
       SendHTML_Header();    
       webpage += F("<table align='center'>");
-      webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th></tr>");
+      webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th><th>Download</th><th>Delete</th></tr>");
       printDirectory("/",0);
       webpage += F("</table>");
       SendHTML_Content();
