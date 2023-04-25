@@ -245,10 +245,12 @@ void SD_dir()
     if (root) {
       root.rewindDirectory();
       SendHTML_Header();    
+      webpage += F("<div>");
       webpage += F("<table align='center'>");
       webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th><th>Download</th><th>Delete</th></tr>");
       printDirectory("/",0);
       webpage += F("</table>");
+      webpage += F("</div>");
       SendHTML_Content();
       root.close();
     }
@@ -312,12 +314,12 @@ void printDirectory(const char * dirname, uint8_t levels)
       webpage += "<td>"+fsize+"</td>";
       webpage += "<td>";
       webpage += F("<FORM action='/' method='post'>"); 
-      webpage += F("<button type='submit' name='download'"); 
+      webpage += F("<button type='submit' class='download' name='download'"); 
       webpage += F("' value='"); webpage +="download_"+String(file.name()); webpage +=F("'>Download</button>");
       webpage += "</td>";
       webpage += "<td>";
       webpage += F("<FORM action='/' method='post'>"); 
-      webpage += F("<button type='submit' name='delete'"); 
+      webpage += F("<button type='submit' class='delete' name='delete'"); 
       webpage += F("' value='"); webpage +="delete_"+String(file.name()); webpage +=F("'>Delete</button>");
       webpage += "</td>";
       webpage += "</tr>";
@@ -401,7 +403,7 @@ void SD_file_delete(String filename)
       if (SD.remove("/"+filename)) {
         Serial.println(F("File deleted successfully"));
         webpage += "<h3>File '"+filename+"' has been erased</h3>"; 
-        webpage += F("<a href='/'>[Back]</a><br><br>");
+        webpage += F("<a  href='/'>Back</a><br><br>");
       }
       else
       { 
