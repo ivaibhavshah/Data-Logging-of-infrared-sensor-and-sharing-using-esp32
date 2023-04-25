@@ -6,7 +6,18 @@ void append_page_header() {
   webpage += F("<title>Server</title>"); // NOTE: 1em = 16px
   webpage += F("<meta name='viewport' content='user-scalable=yes,initial-scale=1.0,width=device-width'>");
   webpage += F("<style>");//From here style:
-  webpage += F("div{margin:0 20px 0 20px;}");
+
+  webpage += F(".dashboard{margin:0 20px 0 20px;}");
+
+  webpage += F(".upload{text-align:center;}");
+  webpage += F(".upload-h3{text-align:center;font-size: 30px;margin:0 0 10px 0;}");
+  webpage += F(".upload-btn{color:black;diaplay:block;padding:10px;border-radius:8px;padding:0.44em 0.44em;text-decoration:none;font-size:100%;border: 1px solid #0c3c54;margin: 0 0 0 5px;}");
+  webpage += F(".back{font-size:20px;color:black;diaplay:block;padding:10px;border-radius:8px;padding:0.44em 0.44em;text-decoration:none;font-size:100%;border: 1px solid #0c3c54;margin: 0 0 0 5px;}");
+  webpage += F(".back:hover{background-color:#0c3c54;color: #ffffff;border-radius: 8px;font-size:100%}");
+  webpage += F(".upload-btn:hover{background-color:#0c3c54;color: #ffffff;border-radius: 8px;font-size:100%}");
+  webpage += F("input::file-selector-button{font-weight: bold;border-radius: 5px;padding: 5px;cursor: pointer; }");
+  webpage += F("input{width:25%;}");
+  
   webpage += F("ul{list-style-type:none;margin: 20px 20px;padding:0;height: 3em;border-radius:8px;overflow:hidden;-webkit-box-shadow: 0 10px 6px -6px #312e2e;-moz-box-shadow: 0 10px 6px -6px #312e2e;box-shadow: 0 10px 6px -6px #312e2e;}");
   webpage += F("li{float:left;border-radius:8px;margin-top: 10px;border-right:0em solid #bbb;}");
   webpage += F("li a{color:black;diaplay:block;border-radius:8px;padding:0.44em 0.44em;text-decoration:none;font-size:100%;border: 1px solid #0c3c54;margin: 0 0 0 5px;}");
@@ -18,7 +29,7 @@ void append_page_header() {
   webpage += F("li a:hover{background-color:#0c3c54;color: #ffffff;border-radius: 8px;font-size:100%}");
   webpage += F("h1{color: rgb(24, 66, 101);font-size:1.6em;height:3em;padding:10px;text-align: center;border-radius: 0 0 8px 8px;-webkit-box-shadow: 0 10px 6px -6px #312e2e;-moz-box-shadow: 0 10px 6px -6px #312e2e;box-shadow: 0 10px 6px -6px #312e2e;}");
   webpage += F("h2{color:blue;font-size:0.8em;}");
-  webpage += F("h3{font-size:0.8em; margin: 0 0 0 20px}");
+  
   webpage += F("table{background-color:#cbcbcb7a;border-radius: 10px;border-collapse:collapse;width:100%;-webkit-box-shadow: 0 10px 6px -6px #312e2e;-moz-box-shadow: 0 10px 6px -6px #312e2e;box-shadow: 0 10px 6px -6px #312e2e;}"); 
   webpage += F("th,td {text-align:left;padding:0.3em;border:1px solid white;}"); 
   // webpage += F("tr:nth-child(odd) {background-color:#eeeeee;}");
