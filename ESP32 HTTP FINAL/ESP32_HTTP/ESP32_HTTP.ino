@@ -48,10 +48,15 @@ void setup()
   pinMode(led, OUTPUT);
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+
   wifiMulti.addAP("Green PG","jayhind303");  // add Wi-Fi networks you want to connect to, it connects strongest to weakest
   wifiMulti.addAP("Redmi Note 8 Pro", "11111111");  // Adjust the values in the Network tab
   wifiMulti.addAP("Techsture 2020", "Tech7219@@");
-   Serial.println("Connecting ...");
+  wifiMulti.addAP("POCO M3", "knightmoon");
+  
+  Serial.println("Connecting ...");
+
+
   while (wifiMulti.run() != WL_CONNECTED) { // Wait for the Wi-Fi to connect: scan for Wi-Fi networks, and connect to the strongest of the networks above
     delay(250); Serial.print('.');
   }
@@ -245,7 +250,7 @@ void SD_dir()
     if (root) {
       root.rewindDirectory();
       SendHTML_Header();    
-      webpage += F("<div>");
+      webpage += F("<div class='dashboard'>");
       webpage += F("<table align='center'>");
       webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th><th>Download</th><th>Delete</th></tr>");
       printDirectory("/",0);
@@ -269,11 +274,11 @@ void SD_dir()
 void File_Upload()
 {
   append_page_header();
-  webpage += F("<h3>Select File to Upload</h3>"); 
-  webpage += F("<FORM action='/fupload' method='post' enctype='multipart/form-data'>");
-  webpage += F("<input class='buttons' style='width:25%' type='file' name='fupload' id = 'fupload' value=''>");
-  webpage += F("<button class='buttons' style='width:10%' type='submit'>Upload File</button><br><br>");
-  webpage += F("<a href='/'>[Back]</a><br><br>");
+  webpage += F("<h3 class='upload-h3'>Select File to Upload</h3>"); 
+  webpage += F("<FORM class='upload' action='/fupload' method='post' enctype='multipart/form-data'>");
+  webpage += F("<input type='file' name='fupload' id = 'fupload' value=''>");
+  webpage += F("<button type='submit' class='upload-btn'>Upload File</button><br><br>");
+  webpage += F("<a href='/'><button class='back'>Back</button></a><br><br>");
   append_page_footer();
   server.send(200, "text/html",webpage);
 }
@@ -298,7 +303,7 @@ void printDirectory(const char * dirname, uint8_t levels)
       SendHTML_Content();
     }
     if(file.isDirectory()){
-      webpage += "<tr><td>"+String(file.isDirectory()?"Dir":"File")+"</td><td>"+String(file.name())+"</td><td></td></tr>";
+      // webpage += "<tr><td>"+String(file.isDirectory()?"Dir":"File")+"</td><td>"+String(file.name())+"</td><td></td></tr>";
       printDirectory(file.name(), levels-1);
     }
     else
@@ -378,10 +383,10 @@ void handleFileUpload()
       Serial.print("Upload Size: "); Serial.println(uploadfile.totalSize);
       webpage = "";
       append_page_header();
-      webpage += F("<h3>File was successfully uploaded</h3>"); 
-      webpage += F("<h2>Uploaded File Name: "); webpage += uploadfile.filename+"</h2>";
-      webpage += F("<h2>File Size: "); webpage += file_size(uploadfile.totalSize) + "</h2><br><br>"; 
-      webpage += F("<a href='/'>[Back]</a><br><br>");
+      webpage += F("<h3 class='upload-h3'>File was successfully uploaded</h3>"); 
+      webpage += F("<h2 class='upload-h3'>Uploaded File Name: "); webpage += uploadfile.filename+"</h2>";
+      webpage += F("<h2 class='upload-h3'>File Size: "); webpage += file_size(uploadfile.totalSize) + "</h2><br><br>"; 
+      webpage += F("<a  href='/'><button class='back'>Back</button</a><br><br>");
       append_page_footer();
       server.send(200,"text/html",webpage);
     } 
@@ -402,8 +407,8 @@ void SD_file_delete(String filename)
     {
       if (SD.remove("/"+filename)) {
         Serial.println(F("File deleted successfully"));
-        webpage += "<h3>File '"+filename+"' has been erased</h3>"; 
-        webpage += F("<a  href='/'>Back</a><br><br>");
+        webpage += "<h3 class='upload-h3'>File '"+filename+"' has been erased</h3>"; 
+        webpage += F("<a  href='/'><button class='back'>Back</button></a><br><br>");
       }
       else
       { 
@@ -448,8 +453,8 @@ void SendHTML_Stop()
 void ReportSDNotPresent()
 {
   SendHTML_Header();
-  webpage += F("<h3>No SD Card present</h3>"); 
-  webpage += F("<a href='/'>[Back]</a><br><br>");
+  webpage += F("<h3 class='upload-h3'>No SD Card present</h3>"); 
+  webpage += F("<a href='/'><button class='back'>Back</button></a><br><br>");
   append_page_footer();
   SendHTML_Content();
   SendHTML_Stop();
@@ -470,8 +475,8 @@ void ReportFileNotPresent(String target)
 void ReportCouldNotCreateFile(String target)
 {
   SendHTML_Header();
-  webpage += F("<h3>Could Not Create Uploaded File (write-protected?)</h3>"); 
-  webpage += F("<a href='/"); webpage += target + "'>[Back]</a><br><br>";
+  webpage += F("<h3 class='upload-h3'>Could Not Create Uploaded File (write-protected?)</h3>"); 
+  webpage += F("<a href='/"); webpage += target + "'><button class='back'>Back</button></a><br><br>";
   append_page_footer();
   SendHTML_Content();
   SendHTML_Stop();
