@@ -106,7 +106,7 @@ void loop()
     logSDCard();
     digitalWrite(led, 0);
   }
-  delay(1000);
+  delay(200);
 
 
 }
@@ -274,8 +274,8 @@ void SD_dir()
 void File_Upload()
 {
   append_page_header();
-  webpage += F("<h3 class='upload-h3'>Select File to Upload</h3>"); 
-  webpage += F("<FORM class='upload' action='/fupload' method='post' enctype='multipart/form-data'>");
+  webpage += F("<h3 class='h-text'>Select File to Upload</h3>"); 
+  webpage += F("<FORM class='form-upload' action='/fupload' method='post' enctype='multipart/form-data'>");
   webpage += F("<input type='file' name='fupload' id = 'fupload' value=''>");
   webpage += F("<button type='submit' class='upload-btn'>Upload File</button><br><br>");
   webpage += F("<a href='/'><button class='back'>Back</button></a><br><br>");
@@ -383,10 +383,10 @@ void handleFileUpload()
       Serial.print("Upload Size: "); Serial.println(uploadfile.totalSize);
       webpage = "";
       append_page_header();
-      webpage += F("<h3 class='upload-h3'>File was successfully uploaded</h3>"); 
-      webpage += F("<h2 class='upload-h3'>Uploaded File Name: "); webpage += uploadfile.filename+"</h2>";
-      webpage += F("<h2 class='upload-h3'>File Size: "); webpage += file_size(uploadfile.totalSize) + "</h2><br><br>"; 
-      webpage += F("<a  href='/'><button class='back'>Back</button</a><br><br>");
+      webpage += F("<h3 class='h-text'>File was successfully uploaded</h3>"); 
+      webpage += F("<h2 class='h-text'>Uploaded File Name: "); webpage += uploadfile.filename+"</h2>";
+      webpage += F("<h2 class='h-text'>File Size: "); webpage += file_size(uploadfile.totalSize) + "</h2><br><br>"; 
+      webpage += F("<a href='/'><button class='back'>Back</button</a><br>");
       append_page_footer();
       server.send(200,"text/html",webpage);
     } 
@@ -407,13 +407,13 @@ void SD_file_delete(String filename)
     {
       if (SD.remove("/"+filename)) {
         Serial.println(F("File deleted successfully"));
-        webpage += "<h3 class='upload-h3'>File '"+filename+"' has been erased</h3>"; 
-        webpage += F("<a  href='/'><button class='back'>Back</button></a><br><br>");
+        webpage += "<h3 class='h-text'>File '"+filename+"' has been deleted</h3>"; 
+        webpage += F("<a href='/'><button class='back'>Back</button></a><br><br>");
       }
       else
       { 
-        webpage += F("<h3>File was not deleted - error</h3>");
-        webpage += F("<a href='/'>[Back]</a><br><br>");
+        webpage += F("<h3 class='h-text'>File was not deleted - error</h3>");
+        webpage += F("<a href='/'><button class='back'>Back</button></a><br>");
       }
     } else ReportFileNotPresent("delete");
     append_page_footer(); 
@@ -453,7 +453,7 @@ void SendHTML_Stop()
 void ReportSDNotPresent()
 {
   SendHTML_Header();
-  webpage += F("<h3 class='upload-h3'>No SD Card present</h3>"); 
+  webpage += F("<h3 class='h-text'>No SD Card present</h3>"); 
   webpage += F("<a href='/'><button class='back'>Back</button></a><br><br>");
   append_page_footer();
   SendHTML_Content();
@@ -465,7 +465,7 @@ void ReportFileNotPresent(String target)
 {
   SendHTML_Header();
   webpage += F("<h3>File does not exist</h3>"); 
-  webpage += F("<a href='/"); webpage += target + "'>[Back]</a><br><br>";
+  webpage += F("<a href='/"); webpage += target + "'><button class='back'>Back<button></a><br><br>";
   append_page_footer();
   SendHTML_Content();
   SendHTML_Stop();
@@ -475,7 +475,7 @@ void ReportFileNotPresent(String target)
 void ReportCouldNotCreateFile(String target)
 {
   SendHTML_Header();
-  webpage += F("<h3 class='upload-h3'>Could Not Create Uploaded File (write-protected?)</h3>"); 
+  webpage += F("<h3 class='h-text'>Could Not Create Uploaded File (write-protected?)</h3>"); 
   webpage += F("<a href='/"); webpage += target + "'><button class='back'>Back</button></a><br><br>";
   append_page_footer();
   SendHTML_Content();
