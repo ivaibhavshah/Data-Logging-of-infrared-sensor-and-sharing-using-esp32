@@ -49,7 +49,7 @@ void setup()
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
-  wifiMulti.addAP("Green PG","jayhind303");  // add Wi-Fi networks you want to connect to, it connects strongest to weakest
+  // wifiMulti.addAP("Green PG","jayhind303");  // add Wi-Fi networks you want to connect to, it connects strongest to weakest
   wifiMulti.addAP("Redmi Note 8 Pro", "11111111");  // Adjust the values in the Network tab
   wifiMulti.addAP("Techsture 2020", "Tech7219@@");
   wifiMulti.addAP("POCO M3", "knightmoon");
@@ -98,7 +98,6 @@ void loop()
 {
   server.handleClient(); //Listen for client connections
   getTime();
-
   ReadData();
   if (distance<20)
   {
@@ -116,6 +115,8 @@ void getTime(){
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo)) {
     Serial.println("Failed to obtain time");
+    String temp = "/temp.txt";  
+    temp.toCharArray(filename_wt, 50);
     return;
   }
   // There was an error in pre defined function for getting year soo we variable for getting year only is used
@@ -199,7 +200,7 @@ void ReadData(){
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
-  
+
   // Reads the echoPin, returns the sound wave travel time in microseconds
   duration = pulseIn(echoPin, HIGH);
   

@@ -2,7 +2,7 @@ import requests
 from datetime import date
 import pyodbc
 
-IP_HOST = "192.168.1.5" 
+IP_HOST = "192.168.169.134" 
 # get date 
 today = date.today()
 year = today.year
