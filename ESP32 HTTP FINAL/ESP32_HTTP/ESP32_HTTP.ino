@@ -137,7 +137,7 @@ void logSDCard() {
 
   
   readingID++;
-  dataMessage = String(readingID) + "," + String(DateTime) + "," + 
+  dataMessage = ","+String(readingID) + "," + String(DateTime) + "," + 
                 String(distance) + "\r\n";
   Serial.print("Save data: ");
   Serial.println(dataMessage);

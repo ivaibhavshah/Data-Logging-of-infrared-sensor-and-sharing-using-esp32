@@ -2,12 +2,12 @@ import requests
 from datetime import date
 import pyodbc
 
-IP_HOST = "192.168.169.134" 
+IP_HOST = "192.168.127.134" 
 # get date 
 today = date.today()
 year = today.year
 month = today.month
-day = (today.day)-1
+day = (today.day)
 print(day)
 yesterday = str(year)+str(month)+str(day)
 print(yesterday)
@@ -24,7 +24,7 @@ open(filename_download, "wb").write(response.content)
 # Code to insert data into SQL server
 cnxn = pyodbc.connect('DRIVER={SQL Server};SERVER=.\;DATABASE=master;UID=sa;PWD=knightmoon')
 cursor = cnxn.cursor()
-filename_download = 'D:/SEM 8/' + filename_download
+filename_download = 'D:/SEM 8/IoT-ESP32/ESP32 HTTP FINAL/' + filename_download
 qry = "BULK INSERT esp32_data FROM '"+filename_download+ "' WITH (FIRSTROW=2,FIELDTERMINATOR=',',ROWTERMINATOR='\n');"
 print(qry)
 cursor.execute(qry)
